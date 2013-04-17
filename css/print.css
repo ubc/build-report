@@ -15,7 +15,7 @@ header {
 	width:100%;
 }
 
-body{
+body.print-report{
 	background: #FFF;
 }
 .print-report #ubc7-unit a,

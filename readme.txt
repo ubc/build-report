@@ -25,5 +25,5 @@ You don't want more then one to display on the page
 2. Create a page that will have the help user to print it.
 and add the shortcode [display_report]
 
-3. Add the [report_list url="print_report_page_url"] to display where you want it to. 
+3. Add the [report_list print_url="print_report_page_url"] to display where you want it to. 
 		

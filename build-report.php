@@ -45,8 +45,6 @@ Class CTLT_Build_Report{
 		add_action( 'init', array( __CLASS__, 'start' ) );
 		add_action( 'wp_footer', array(__CLASS__, 'print_scripts') );
 		
-		
-		
 		add_shortcode( 'add_to_report', array(__CLASS__, 'add_to_report' ) );
 		add_shortcode( 'report_list', array(__CLASS__, 'report_list' ) );
 		
@@ -259,9 +257,7 @@ Class CTLT_Build_Report{
 			self::report_list_html( $data );
 		endif; ?>
 		</div>
-		<?php
-		if( $print_url ):
-		?>
+		<?php if( $print_url ): ?>
 		<a href="<?php echo $print_url; ?>?print-report" title="Print Report" class="btn">Print report <i class="icon-print"></i></a>
 		
 		<?php
@@ -361,15 +357,7 @@ Class CTLT_Build_Report{
 			<?php	
 			endforeach;
 			
-			if( $print_url ):
 			?>
-			<a href="<?php echo $print_url; ?>?print-report" title="Print Report" target="_blank" class="btn">Print report <i class="icon-print"></i></a>
-			
-			<?php
-			else: ?>
-				<span class="error">Please Specify the print_url attribute</span>
-			<?php 
-			endif; ?>
 			</div><!-- end of report list -->
 			
 			<?php if( isset( $_GET['print-report'] ) && $_GET['print-report'] == 'print' ): ?>
