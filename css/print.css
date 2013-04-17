@@ -1,0 +1,28 @@
+
+
+/* there should be a long list of things not to display */
+
+#ubc7-unit-menu,
+.navbar,
+.breadcrumb,
+.widget,
+footer,
+header {
+	display:none;
+}
+
+.print-report #content {
+	width:100%;
+}
+
+body{
+	background: #FFF;
+}
+.print-report #ubc7-unit a,
+.print-report #ubc7-unit {
+	background: #FFF;
+	color: #333;
+	box-shadow: none;
+	text-shadow: none;
+}
+
