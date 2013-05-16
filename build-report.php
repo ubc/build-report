@@ -47,11 +47,12 @@ Class CTLT_Build_Report{
 		
 		add_shortcode( 'add_to_report', array(__CLASS__, 'add_to_report' ) );
 		add_shortcode( 'report_list', array(__CLASS__, 'report_list' ) );
+		add_shortcode( 'report_count', array(__CLASS__, 'report_count' ) );
 		
 		add_shortcode( 'display_report', array(__CLASS__, 'display_report' ) );
 		
 		add_action( 'wp_ajax_report_list', array(__CLASS__, 'updated_report_list' ) );
-		
+		add_action( 'wp_ajax_nopriv_report_list', array(__CLASS__, 'updated_report_list' ) );
 		// just for testing 
 		if( isset( $_GET['delete-cookie'] ) ):
 			self::delete_cookie();
@@ -165,7 +166,7 @@ Class CTLT_Build_Report{
 			$text = ( $in_report ? $remove_text : $add_text );
 			$action = ( $in_report ? 'remove' : 'add' );
 			$url  = "?report_builder=". $post_id;
-			$html = '<a href="'.esc_url($url).'" data-post_id="'.esc_attr($post_id).'" data-add_text="'.$add_text.'" data-remove_text="'.$remove_text.'" data-action="'.esc_attr($action).'"  class="build-report-action action-'.$action.'-post '.esc_attr($class).'">'.esc_html($text).'</a>';
+			$html = '<a href="'.esc_url($url).'" data-post_id="'.esc_attr($post_id).'" data-add_text="'.$add_text.'" data-remove_text="'.$remove_text.'" data-action="add" id="report-action-button-'.$post_id.'"  class="build-report-action '.esc_attr($class).'">'.esc_html( $add_text ).'</a>';
 			
 		else:
 			$html = '';
@@ -177,7 +178,7 @@ Class CTLT_Build_Report{
 	/* ajax */
 	
 	function updated_report_list() {
-		
+		global $post;
 		$query2 =  self::get_report_data();
 		
 		$data = array();
@@ -203,8 +204,11 @@ Class CTLT_Build_Report{
 			
 			$html = ob_get_contents();
 			ob_end_clean();
+		else :
+			echo 'empty';
 			
 		endif;
+		
 		
 		echo $html;
 		die();
@@ -219,15 +223,17 @@ Class CTLT_Build_Report{
 	 */
 	function report_list( $atts ){
 		global $post;
+		extract( shortcode_atts( array(
+			'print_url' 	=> null,
+			'empty'			=> '',
+			), $atts ) );
 		
-		if(empty( self::$cookie ) )
-			return '';
+		
+		if( empty( self::$cookie ) )
+			return '<div class="report-list-shell"><div class="report-list-wrap" data-empty="'. esc_attr( $empty ).'"><div class="report-empty">'.$empty.'</div></div></div>';
 		
 		self::$add_scripts = true;
 		
-		extract( shortcode_atts( array(
-			'print_url' 	=> null
-			), $atts ) );
 		
 		$query2 =  self::get_report_data();
 		
@@ -251,15 +257,19 @@ Class CTLT_Build_Report{
 		?>
 		<div class="report-list-shell">
 		
-		<div class="report-list-wrap">
+		<div class="report-list-wrap" data-empty="<?php echo esc_attr( $empty ); ?>">
 		<?php 
+		
 		if( !empty( $data ) ):
 			self::report_list_html( $data );
-		endif; ?>
+		else:
+			echo '<div class="report-empty">'.$empty.'</div>';
+		endif;
+		
+		 ?>
 		</div>
 		<?php if( $print_url ): ?>
-		<a href="<?php echo $print_url; ?>?print-report" title="Print Report" class="btn">Print report <i class="icon-print"></i></a>
-		
+			<a href="<?php echo $print_url; ?>?print-report" title="Print Report" class="btn">Print report <i class="icon-print"></i></a>
 		<?php
 		else: ?>
 			<span class="error">Please Specify the print_url attribute</span>
@@ -275,6 +285,20 @@ Class CTLT_Build_Report{
 	}
 	
 	/**
+	 * report_count function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function report_count() {
+		
+		if( is_array(self::$cookie) && !empty(self::$cookie[0]) ):
+			return '<span class="count-report-num">'.count (self::$cookie). '</span>';
+		else:
+			return '<span class="count-report-num"></span>';
+		endif;
+	}
+	/**
 	 * report_list_html function.
 	 * 
 	 * @access public
@@ -282,16 +306,19 @@ Class CTLT_Build_Report{
 	 * @return void
 	 */
 	function report_list_html( $data ) {
-	
+		
+		
 		foreach($data as $post_type => $post_type_array): ?>
+			<div id="report-<?php echo $post_type; ?>" class="report-post-type-wrap">
 			<h3 class="report-list-title"><?php echo $post_type; ?></h3>
 			<ul class="report_list report_list_<?php echo $post_type; ?>">
 			
 			<?php foreach( $post_type_array as $post_info ): ?>
-				<li><a href="<?php echo $post_info['url']; ?>" class=""><?php echo $post_info['title']; ?></a> <a href="?report_builder=<?php echo $post_info['id']; ?>" class="build-report-action action-remove-post">remove</a></li>
+				<li id="report-<?php echo $post_info['id']; ?>"><a href="<?php echo $post_info['url']; ?>" class=""><?php echo $post_info['title']; ?></a> <a href="?report_builder=<?php echo $post_info['id']; ?>"  class="action-remove-post remove-post-icon" data-post_id="<?php echo $post_info['id']; ?>"><i class=" icon-remove"></i></a></li>
 			<?php endforeach; ?>
 			
 			</ul>
+			</div>
 		<?php	
 		endforeach;
 		
@@ -360,7 +387,7 @@ Class CTLT_Build_Report{
 			?>
 			</div><!-- end of report list -->
 			
-			<?php if( isset( $_GET['print-report'] ) && $_GET['print-report'] == 'print' ): ?>
+			<?php if( isset( $_GET['print-report'] ) ): ?>
 				<script>
 				window.print();
 				</script>

@@ -5,12 +5,24 @@
 		cookie : [],
 		init: function(){
 			var cookie = $.cookie('ctlt_report_builder');
-			Build_Report.cookie = ( cookie ? cookie.split(',') : [] ) ;
+			Build_Report.cookie = ( typeof cookie  != "undefined"  && cookie.length > 0 ? cookie.split(',') : [] ) ;
 			Build_Report.shell = $('.report-list-shell');
 			
-			console.log( Build_Report.cookie );
 			
+			Build_Report.shell.on('click','.remove-post-icon', function(event) { 
+				
+				Build_Report.remove_post_type(event, this); 
+				event.preventDefault(); 
+			} );
 			$('.build-report-action').on('click', Build_Report.click );
+			
+			
+			Build_Report.update_count();
+			
+			Build_Report.update_report_list();
+			
+			Build_Report.update_link();
+			
 		},
 		
 		add_to_cookie: function( post_id ) {
@@ -18,8 +30,7 @@
 			Build_Report.cookie.push( post_id.toString() );
 			$.cookie( 'ctlt_report_builder', Build_Report.cookie.join(',') , { expires: 14, path: '/' });
 			
-			
-			//console.log( 'added '+post_id+' to cookie' );
+			Build_Report.update_count();
 		},
 		
 		remove_from_cookie: function( post_id ) {
@@ -29,10 +40,18 @@
 	 		if(idx!=-1) { Build_Report.cookie.splice(idx, 1); }
 	 		
 	 		$.cookie( 'ctlt_report_builder', Build_Report.cookie.join(',') , { expires: 14, path: '/' });
-	 		
-	 		//console.log( 'removeded '+post_id+' from cookie' );
+	 		Build_Report.update_count();
 		},
-		
+		update_count: function() {
+			
+			var number = Build_Report.cookie.length.toString();
+			if(number  == '0'){
+				$('.count-report-num').text('');
+			} else {
+				$('.count-report-num').text(number);
+			}
+			
+		},
 		click: function() {
 			var el = $(this);
 			
@@ -51,13 +70,37 @@
 			} else {
 				Build_Report.remove_from_cookie( post_id );
 			}
-			Build_Report.update_report_list();
 			
 			el.text( new_text );
 			el.data( 'action', new_action );
 			
+			Build_Report.update_report_list();
+			
 			return false;
 		
+		},
+		
+		remove_post_type : function ( event, elm) {
+			
+			var el = $(elm);
+			
+			var post_id = el.data( 'post_id' );
+		
+			
+			var same_as_page = $('#report-action-button-'+post_id);
+			
+			if( same_as_page.size() > 0 ) {
+				same_as_page.trigger( 'click' );
+			
+			} else { 
+				
+				Build_Report.remove_from_cookie( post_id );
+				Build_Report.update_report_list();
+			
+			} 
+			
+			return false;
+			
 		},
 		
 		update_report_list: function() {
@@ -65,18 +108,35 @@
 			var data = {
 				action: 'report_list'
 			};
-			
+			var wrap = jQuery('.report-list-wrap');
+			if(Build_Report.cookie.length > 0) { 
 			jQuery.post( build_report_ajaxurl, data, function(response) {
 				
-				// alert( 'Got this from the server: ' + response );
-				jQuery('.report-list-wrap').html( response );
-				// update the list
+				
+				if(response == 'empty'){
+					wrap.html( '<div class="report-empty">'+wrap.data('empty')+'</div>' );
+				} else {
+					wrap.html( response );	
+				}
 			});
-		
+			} else {
+				wrap.html( '<div class="report-empty">'+wrap.data('empty')+'</div>' );
+			}
+		}, 
+		update_link : function() {
+			jQuery.each( Build_Report.cookie, function(index, post_id ) {
+			var same_as_page = jQuery('#report-action-button-'+post_id);
+			if( same_as_page.size() > 0 ) {
+				
+				same_as_page.data( 'action', 'remove' );
+				var remove_text = same_as_page.data( 'remove_text' );
+				same_as_page.text(remove_text);
+			
+			}
+			});
+
 		} 
-		
-		
-	} 
+	}
 
 	$(d).ready(Build_Report.init);
 
