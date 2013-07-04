@@ -269,7 +269,7 @@ Class CTLT_Build_Report{
 		 ?>
 		</div>
 		<?php if( $print_url ): ?>
-			<a href="<?php echo $print_url; ?>?print-report" title="Print Report" class="btn">Print report <i class="icon-print"></i></a>
+			<a href="<?php echo $print_url; ?>?print-report" title="Print Report" class="btn" target="_blank">Print report <i class="icon-print"></i></a>
 		<?php
 		else: ?>
 			<span class="error">Please Specify the print_url attribute</span>
