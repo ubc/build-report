@@ -228,11 +228,12 @@ Class CTLT_Build_Report{
 			'empty'			=> '',
 			), $atts ) );
 		
+		self::$add_scripts = true;
 		
 		if( empty( self::$cookie ) )
 			return '<div class="report-list-shell"><div class="report-list-wrap" data-empty="'. esc_attr( $empty ).'"><div class="report-empty">'.$empty.'</div></div></div>';
 		
-		self::$add_scripts = true;
+		
 		
 		
 		$query2 =  self::get_report_data();
@@ -336,10 +337,12 @@ Class CTLT_Build_Report{
 	
 		global $post;
 		
+		self::$add_scripts = true;
+		
 		if(empty( self::$cookie ) )
 			return '';
 		
-		self::$add_scripts = true;
+		
 		
 		extract( shortcode_atts( array(
 			'print_url' 	=> null
