@@ -106,7 +106,7 @@ Class CTLT_Build_Report{
 	 *
 	 * @access public
 	 * @param mixed $body_class
-	 * @return void
+	 * @return array
 	 */
 	public static function body_class_filter( $body_class ) {
 
@@ -432,7 +432,7 @@ Class CTLT_Build_Report{
 	 * get_report_data function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return object
 	 */
 	public static function get_report_data() {
 
